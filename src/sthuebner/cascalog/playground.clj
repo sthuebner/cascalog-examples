@@ -81,6 +81,23 @@
 
 
 
+  ;;; Outer Joins
+
+  ;; ALL people and their friends
+  (?<- (stdout)
+       [?person !!friend]
+       (person ?person)
+       (follows ?person !!friend))
+
+  ;; people not following anybody
+  (?<- (stdout)
+       [?person]
+       (person ?person)
+       (follows ?person !!friend)
+       (nil? !!friend))
+
+
+  
   ;;; Aggregators
 
   ;; Number of people a person follows
@@ -127,4 +144,19 @@
          (many-followers ?friend)
          ))
 
+
+
+
+  ;;; Sorting
+  (defbufferop first-tuple [tuples]
+    (first tuples))
+
+  ;; youngest friend
+  (?<- (stdout)
+       [?person ?friend-out]
+       (follows ?person ?friend)
+       (age ?friend ?age)
+       (:sort ?age)
+       (first-tuple ?friend :> ?friend-out))
+  
   )
