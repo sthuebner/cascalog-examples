@@ -1,0 +1,34 @@
+#+TITLE:     A Playground for Cascalog
+#+AUTHOR:    Stefan Hübner / @sthuebner
+#+EMAIL:     sthuebner@googlemail.com
+#+DATE:      March 2012
+
+* A Playground for Cascalog
+
+This repo contains a bunch of examples for using Cascalog. If you're
+not yet familiar with [[https://github.com/nathanmarz/cascalog][Cascalog]], the following resources are highly
+recommended:
+
++ [[http://nathanmarz.com/blog/introducing-cascalog-a-clojure-based-query-language-for-hado.html][Nathan Marz: Introducing Cascalog (blog post)]]
++ [[http://blip.tv/clojure/nathan-marz-cascalog-making-data-processing-fun-again-5970118][Nathan Marz: "Cascalog: Making Data Processing Fun Again" (Talk at Clojure/conj 2011)]]
+
+
+* Using Leiningen and SLIME
+
+#+BEGIN_SRC shell
+$ git clone git@github.com:sthuebner/cljugb-cascalog.git
+...
+$ lein deps
+...
+$ lein swank
+#+END_SRC
+
+Then head over to Emacs (if you're not already in it :) ) and
+
+: M-x slime-connect RET RET RET
+
+
+* Wikimedia Data
+
+The namespace =sthuebner.cascalog.wikimedia= works on data taken from
+http://dumps.wikimedia.org/other/pagecounts-raw/
