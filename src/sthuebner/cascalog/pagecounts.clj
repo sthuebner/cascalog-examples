@@ -39,7 +39,21 @@
         (split ?line :> ?project ?page ?requests ?bytes))))
 
 
-;;; language and site
+(comment
+
+  (?- (stdout)
+      pagecounts)
+  
+  )
+
+
+
+
+
+
+;;; Let's get some numbers!
+
+;; language and site
 (defn lang-site [project]
   (let [[lang site] (.split project "\\.")]
     [lang site]))
