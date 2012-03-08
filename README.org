@@ -16,7 +16,7 @@ recommended:
 * Using Leiningen and SLIME
 
 #+BEGIN_SRC shell
-$ git clone git@github.com:sthuebner/cljugb-cascalog.git
+$ git clone git://github.com/sthuebner/cascalog-examples.git
 ...
 $ lein deps
 ...
