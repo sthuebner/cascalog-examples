@@ -15,12 +15,32 @@
 
 
 
-  ;; people younger than 30
-  (?<- (stdout)                             ; destination
-       [?person ?age]                       ; output vars
-       (age ?person ?age)                   ; generator
-       (< ?age 30))                         ; filter
+  
 
+
+  
+  ;; A  sample query
+  
+  (<- [?person ?age]                       ; output vars
+      (age ?person ?age)                   ; generator
+      (< ?age 30))                         ; filter
+
+
+
+
+
+
+
+
+  
+
+  ;; Execute the query
+  (?<- (stdout)                             ; destination
+       [?person ?age]
+       (age ?person ?age)
+       (< ?age 30))
+
+  
 
   ;; compute new values
   (?<- (stdout)
