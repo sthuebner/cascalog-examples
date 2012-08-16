@@ -15,10 +15,12 @@ recommended:
 
 * Using Leiningen and SLIME
 
+I use Leiningen 2.0. If you haven't installed or upgraded yet, follow
+the [[https://github.com/technomancy/leiningen/#installation][Installation Instructions]].
+
+Then:
 #+BEGIN_SRC shell
 $ git clone git://github.com/sthuebner/cascalog-examples.git
-...
-$ lein deps
 ...
 $ lein swank
 #+END_SRC
