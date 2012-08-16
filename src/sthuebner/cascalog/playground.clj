@@ -32,12 +32,11 @@
 
 
 
-  
 
   ;; Execute the query
   (?<- (stdout)                             ; destination
-       [?person ?age]
-       (age ?person ?age)
+       [?person ?person-age]
+       (age ?person ?person-age)
        (< ?age 30))
 
   
@@ -153,15 +152,16 @@
         (younger-than? limit ?age)))
 
   
-  (let [younger-than-30 (young-people 30)]
-    (?<- (stdout)
-         [?youngster ?followed ?age]
-         (younger-than-30 ?youngster _)
-         (follows ?youngster ?followed)
-         (age ?followed ?age)))
+  (def youngsters (young-people 30))
+
+  (?- (stdout) youngsters)
   
-
-
+  (?<- (stdout)
+       [?youngster ?followed ?age]
+       (youngsters ?youngster _)
+       (follows ?youngster ?followed)
+       (age ?followed ?age))
+  
 
 
 
@@ -197,7 +197,8 @@
        [?person ?avg]
        (follows ?person ?friend)
        (age ?friend ?age)
-       
+
+       ;; compute ?avg age
        (c/sum ?age :> ?sum)
        (c/count ?count)
        (div ?sum ?count :> ?avg))
@@ -221,6 +222,23 @@
 
 
 
+
+  
+
+  ;; putting pieces together
+  (?<- (stdout)
+       [?youngster ?follower-avg-age]
+       (youngsters ?youngster _)
+       (follows ?youngster ?follower)
+       (age ?follower ?follower-age)
+       (average ?follower-age :> ?follower-avg-age))
+
+
+
+
+
+
+  
 
 
 
