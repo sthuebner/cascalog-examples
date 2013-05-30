@@ -21,166 +21,182 @@
   
   ;; A  sample query
   
-  (<- [?person ?age]                       ; output vars
-      (age ?person ?age)                   ; generator
-      (< ?age 30))                         ; filter
+  (<- [?person ?year]                       ; output vars
+      (age ?person ?year)                   ; generator
+      (< ?year 30))                         ; filter
+
+
+  (?<- (stdout)
+       [?person]
+       (age ?person ?year)
+       (< ?year 30))
 
 
 
-
-
-
-
-
-
+  
   ;; Execute the query
-  (?<- (stdout)                             ; destination
-       [?person ?person-age]
-       (age ?person ?person-age)
-       (< ?age 30))
+  (def example-query
+    (<- [?person ?year]                       ; output vars
+        (age ?person ?year)                   ; generator
+        (< ?year 30)))
 
-  
+  (?- (stdout)                               ; destination
+      example-query)
 
-  ;; compute new values
-  (?<- (stdout)
-       [?person ?double-age]
-       (age ?person ?age)
-       
-       (* ?age 2 :> ?double-age))
-
-
-  ;; young vs. not-young people
-  (?<- (stdout)
-       [?person ?young]
-       (age ?person ?age)
-       (< ?age 30 :> ?young))           ; ?young = true | false
-
-
-
-
-  
-
-
-
-;;; Constrain with constants
-
-  
-  ;; constrain on an input vars
-  (?<- (stdout)
-       [?person]
-       (age ?person 25))
-
-
-  
-  ;; constrain on a function's result
-  (?<- (stdout)
-       [?person]
-       (age ?person ?age)
-       (* ?age 2 :> 50))
-
-  
-
-  
-
-
-
-  
-  
-;;; Joins
-
-  ;; people with their age and gender
-  (?<- (stdout)
-       [?person ?age ?gender]
-       
-       (age     ?person   ?age)
-       (gender  ?person   ?gender))
-
-
-
-
-
-  ;; a person's friends with their gender
-  (?<- (stdout)
-       [?person           ?followed   ?gender]
-       
-       (follows ?person    ?followed )
-       (gender  ?followed  ?gender ))
-
-
-
-
-
-  ;; mutual followers
-  (?<- (stdout)
-       [?person1 ?person2]
-       (follows ?person1 ?person2)
-       (follows ?person2 ?person1))
-
-
-
-
-
-;;;; Abstraction I: composing queries
-
-  (defn younger-than? [limit age]
-    (< age limit))
 
 
   (?<- (stdout)
-       [?person ?age]
-       (age ?person ?age)
-       (younger-than? 50 ?age))
-
-
-
-  ;; young people: Whom do they follow?
-  (let [younger-than-30 (<- [?person ?age]
-                            (age ?person ?age)
-                            (younger-than? 30 ?age))]
-    (?<- (stdout)
-         [?youngster ?followed ?age]
-         (younger-than-30 ?youngster _)    ; using another query as a generator
-         (follows         ?youngster ?followed)
-         (age ?followed ?age)))
-
-
-
-  ;; define a parameterized "view" on an existing dataset
-  (defn young-people [limit]
-    (<- [?person ?age]
-        (age ?person ?age)
-        (younger-than? limit ?age)))
-
+       [?person ?year ?young]
+       (age ?person ?year)
+       (< ?year 30 :> ?young))
   
-  (def youngsters (young-people 30))
 
-  (?- (stdout) youngsters)
-  
-  (?<- (stdout)
-       [?youngster ?followed ?age]
-       (youngsters ?youngster _)
-       (follows ?youngster ?followed)
-       (age ?followed ?age))
-  
+
+
+
+   ;; compute new values
+   (?<- (stdout)
+        [?person ?year ?a ?b]
+        (age ?person ?year)
+        (* ?year 2 :> ?a)
+        (/ ?year 2 :> ?b))
+
+
+
+   ;; young vs. not-young people
+   (?<- (stdout)
+        [?person ?young]
+        (age ?person ?year)
+        (< ?year 30 :> ?young))           ; ?young = true | false
+
+
+
+
+
+
+
+
+ ;;; Constrain with constants
+
+   (?<- (stdout)
+        [?person]
+        (age ?person ?year)
+        (= 25 ?year))
+
+   ;; constrain on an input vars
+   (?<- (stdout)
+        [?person]
+        (age ?person 25))
+
+
+
+   ;; constrain on a function's result
+   (?<- (stdout)
+        [?person]
+        (age ?person ?year)
+        (* ?year 2 :> 50))
+
+
+
+
+
+
+
+
+
+ ;;; Joins
+
+   ;; people with their age and gender
+   (?<- (stdout)
+        [?person ?year ?gender]
+
+        (age     ?person   ?year)
+        (gender  ?person   ?gender))
+
+
+
+   
+   ;; OUTER JOIN
+   (?<- (stdout)
+        [?person !!age !!gender]
+
+        (age     ?person   !!age)
+        (gender  ?person   !!gender))
+
+
+
+
+
+   ;; a person's friends with their gender
+   (?<- (stdout)
+        [?person           ?followed   ?gender]
+
+        (follows ?person    ?followed )
+        (gender  ?followed  ?gender ))
+
+
+
+
+
+   ;; mutual followers
+   (?<- (stdout)
+        [?person1 ?person2]
+        (follows ?person1 ?person2)
+        (follows ?person2 ?person1))
+
+
+
+
+
+ ;;;; Abstraction I: composing queries
+
+   (defn less-than? [limit age]
+     (< age limit))
+
+
+   (?<- (stdout)
+        [?person ?year]
+        (age ?person ?year)
+        (less-than? 30 ?year))
+
+
+   ;; define a "parameterized view" on an existing dataset
+   (defn people-below [limit]
+     (<- [?person ?year]
+         (age ?person ?year)
+         (less-than? limit ?year)))
+
+
+   (def youngsters (people-below 30))
+
+   (?- (stdout) youngsters)
+
+
+   (?<- (stdout)
+        [?youngster ?friend ?year]
+        ((people-below 30) ?youngster _)
+        (follows ?youngster ?friend)
+        (age ?friend ?year))
+
 
 
 
 
 ;;; Aggregators
 
-  ;; sum up people's age
-  (?<- (stdout)
-       [?sum]
-       (age _ ?age)                       ; _ = ignore value
-       (c/sum ?age :> ?sum))
-
-
-
   ;; count friends
   (?<- (stdout)
        [?person ?count]
        (follows ?person _)
        (c/count ?count))
+
+
+
+  ;; sum up people's age
+  (?<- (stdout)
+       [?sum]
+       (age _ ?year)                       ; _ = ignore value
+       (c/sum ?year :> ?sum))
 
 
 
@@ -196,12 +212,13 @@
   (?<- (stdout)
        [?person ?avg]
        (follows ?person ?friend)
-       (age ?friend ?age)
+       (age ?friend ?year)
 
        ;; compute ?avg age
-       (c/sum ?age :> ?sum)
+       (c/sum ?year :> ?sum)
        (c/count ?count)
-       (div ?sum ?count :> ?avg))
+       (div ?sum ?count :> ?avg)
+       )
 
 
   ;; let's abstract average
@@ -216,8 +233,8 @@
   (?<- (stdout)
        [?person ?avg]
        (follows ?person ?friend)
-       (age ?friend ?age)
-       (average ?age :> ?avg))          ; here we go
+       (age ?friend ?year)
+       (average ?year :> ?avg))          ; here we go
 
 
 
@@ -227,17 +244,44 @@
 
   ;; putting pieces together
   (?<- (stdout)
-       [?youngster ?follower-avg-age]
+       [?youngster ?friends-avg-age]
        (youngsters ?youngster _)
-       (follows ?youngster ?follower)
-       (age ?follower ?follower-age)
-       (average ?follower-age :> ?follower-avg-age))
+       (follows ?youngster ?friend)
+       (age ?friend ?friend-age)
+       (average ?friend-age :> ?friends-avg-age))
 
 
 
 
 
+  ;; Testing
+  
+  (def average-age-of-youngsters-friends
+    (<- [?youngster ?friends-avg-age]
+        (youngsters ?youngster _)
+        (follows ?youngster ?friend)
+        (age ?friend ?friend-age)
+        (average ?friend-age :> ?friends-avg-age)))
 
+  (fact
+   average-age-of-youngsters-friends
+   => (produces [["alice" 27.666666666666668]
+                 ["david" 32.0]
+                 ["emily" 30.0]]))
+
+
+
+
+
+  ;; Template Taps
+  (?<- (lfs-textline "/tmp/foo"
+                     :sink-template "%s/"
+                     :templatefields [ "?1st-letter" ]
+                     :outfields [ "?name" "?year" ]
+                     :sinkmode :replace)
+       [?name ?year ?1st-letter]
+       (age ?name ?year)
+       (first ?name :> ?1st-letter))
   
 
 
@@ -323,8 +367,8 @@ address. The query tests that a proper subset is produced."
   (fact "youngest friend"
         (<- [?person ?friend-out]
             (follows ?person ?friend)
-            (age ?friend ?age)
-            (:sort ?age)
+            (age ?friend ?year)
+            (:sort ?year)
             (first-tuple ?friend :> ?friend-out))
         (produces [["alice" "david"]
                    ["bob" "david"]
